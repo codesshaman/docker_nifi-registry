@@ -1,0 +1,5 @@
+flow_storage
+database
+certs
+logs
+.env

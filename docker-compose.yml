@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  nifi-registry:
+    # image: $NIFI_IMAGE
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./ldap:/opt/certs:z
+    #   - database:/opt/nifi-registry/nifi-registry-current/database:z
+    #   - flow_storage:/opt/nifi-registry/nifi-registry-current/flow_storage:z
+    #   - logs:/opt/nifi-registry/nifi-registry-current/logs:z
+    ports:
+      - $NIFI_HTTPS_PORT:18443
+      - $NIFI_PORT:18080
+    container_name: $NIFI_NAME
+    restart: unless-stopped
+    hostname: $NIFI_NAME
+    environment:
+      LOG_LEVEL: $LOG_LEVEL
+      AUTH: $AUTH
+      KEYSTORE_PATH: $KEYSTORE_PATH
+      KEYSTORE_TYPE: $KEYSTORE_TYPE
+      KEYSTORE_PASSWORD: $KEYSTORE_PASSWORD
+      TRUSTSTORE_PATH: $TRUSTSTORE_PATH
+      TRUSTSTORE_PASSWORD: $TRUSTSTORE_PASSWORD
+      TRUSTSTORE_TYPE: $TRUSTSTORE_TYPE
+      INITIAL_ADMIN_IDENTITY: $INITIAL_ADMIN_IDENTITY
+      LDAP_AUTHENTICATION_STRATEGY: $LDAP_AUTHENTICATION_STRATEGY
+      LDAP_MANAGER_DN: $LDAP_MANAGER_DN
+      LDAP_MANAGER_PASSWORD: $LDAP_MANAGER_PASSWORD
+      LDAP_USER_SEARCH_BASE: $LDAP_USER_SEARCH_BASE
+      LDAP_USER_SEARCH_FILTER: $LDAP_USER_SEARCH_FILTER
+      LDAP_IDENTITY_STRATEGY: $LDAP_IDENTITY_STRATEGY
+      LDAP_URL: $LDAP_URL
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://127.0.0.1:18080/nifi-registry"]
+      start_period: 95s
+      interval: 15s
+      timeout: 1s
+    cpus: 1
+    mem_limit: 1G
+    mem_reservation: 1G 
+#     networks:
+#       network:
+#         ipv4_address: $RGSTR_HOST
+
+# networks:
+#   network:
+#     driver: bridge
+#     # name: $NETWK_NAME
+#     ipam:
+#       config:
+#         - subnet: $NETWK_ADDR
+#           gateway: $NETWK_GATE
+
+volumes:
+  database:
+    driver_opts:
+      # o: bind
+      type: none
+      device: $DB_PATH
+
+  logs:
+    driver_opts:
+      # o: bind
+      type: none
+      device: $LOGS_PATH
+
+  flow_storage:
+    driver_opts:
+      # o: bind
+      type: none
+      device: $FLOW_PATH
